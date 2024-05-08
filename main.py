@@ -36,8 +36,7 @@ for line in lines:
             #print(f)
             fieldqparsed = re.split(r' (?! ?[0-9a-zA-Z]+[\),])', f)  #split by whitespace except when it's in brackets
             #print(fieldqparsed)
-            if "primary" not in fieldqparsed[
-                0].lower():  #primary key part of query is not a field so do nothing when encountered
+            if "primary" not in fieldqparsed[0].lower():  #primary key part of query is not a field so do nothing when encountered
                 fieldname = fieldqparsed[0]
                 fieldtype = fieldqparsed[1]
                 fields.append(Field(fieldname, fieldtype))
@@ -52,8 +51,7 @@ dbconfig = [
                 {
                     field.name:
                         {
-                            "Field type": field.type,
-                            "Data type": "None",
+                            "Data type": field.type,
                             "Max length": "None",
                             "Min length": "None",
                             "Excluded": "None",
