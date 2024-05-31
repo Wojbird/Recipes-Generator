@@ -76,14 +76,15 @@ for tab in configData["Tables"]:
     tableName = tab["Table name"]
 
     # ...
-    print("({})".format(tab["Table name"]) + "\n")
+    print("\n" + "{}:".format(tab["Table name"]))
     # ...
 
     for fld in tab["Fields"]:
         fieldsName = fld["Field name"]
 
         # ...
-        print("({})".format(fld["Field name"]))
+        print("\t" + "{}".format(fld["Field name"]))
         # ...
+
 
 config.close()
