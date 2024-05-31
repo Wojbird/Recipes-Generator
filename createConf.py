@@ -119,23 +119,33 @@ for line in lines:
                             break
 
 
-dbconfig = [
-    {
-        table.name:
-            [
-                {
-                    field.name:
+dbconfig = {
+    "Tables":
+        [
+            {
+                "Table name": table.name,
+                "Fields":
+                    [
                         {
-                            "Data type": field.type,
+
+                            "Field name": field.name,
+                            "Data type":
+                                field.type + " PK" if field.isPrimaryKey else
+                                field.type + " FK References " + field.FKRefrences[0] + " in " + field.FKRefrences[1] if field.isPrimaryKey else
+                                field.type + " not null" if not field.nullable else
+                                field.type,
+                            "Validation (regex/code)": "None",
                             "Max length": "None",
                             "Min length": "None",
                             "Excluded": "None",
                             "Must have": "None"
-                        }
-                } for field in table.fields
-            ]
-    } for table in tables
-]
+
+                        } for field in table.fields
+                    ]
+            } for table in tables
+        ]
+}
+
 json_string = json.dumps(dbconfig)
 with open('dbconfig.json', 'w') as f:
     json.dump(dbconfig, f)
