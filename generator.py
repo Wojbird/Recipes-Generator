@@ -1,6 +1,7 @@
 import sys
 import random
 import json
+
 # takie cos bo mi sie cos jebało i to pomogło
 # sys.path.insert(0, 'C:\\Users\\Wiktoria\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages')
 # sys.path.insert(0, 'C:\\Users\\wojma\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fatsecret')
@@ -20,7 +21,7 @@ def generate_random_food_ids(num_ids):
     return list(food_ids)
 
 # Wygenerowanie 100 losowych ID składników
-num_ingredients = 100
+num_ingredients = 20
 random_food_ids = generate_random_food_ids(num_ingredients)
 
 # Lista na informacje o składnikach
