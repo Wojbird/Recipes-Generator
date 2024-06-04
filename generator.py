@@ -1,17 +1,36 @@
 import random
 import json
-
 # takie cos bo mi sie cos jebało i to pomogło
 # sys.path.insert(0, 'C:\\Users\\Wiktoria\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages')
 # sys.path.insert(0, 'C:\\Users\\wojma\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fatsecret')
 from fatsecret import Fatsecret
+from openai import OpenAI
+import generatorAI
+
+#klucze do generator AI potrzebne do działania funkcji generatorAI.generate_recipes-----------------------------------------------------------
+# Klucz API i baza URL do OpenAI
+openai_api_key = "jUhuG2SrdScI1eXkacuChnpjGSEU2O8wzgQqc3VnXZOAJmFW"
+openai_api_base = "https://services.clarin-pl.eu/api/v1/oapi"
+
+# Utworzenie klienta OpenAI
+client = OpenAI(
+    api_key=openai_api_key,
+    base_url=openai_api_base,
+)
+
+headers = {
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzc1MmIxNWYtZGUxNy00YTE1LWEyM2UtZTBjYmI3YzhlZDg4IiwidHlwZSI6ImFwaV90b2tlbiJ9.43eOlq8Arh765bNIs9r7Otm2cR6AePy4TwCEt4WYE_I",
+    "Content-Type": "application/json"
+}
+#----------------------------------------------------------------------------------------------------
 
 #wczytywanie pliku konfiguracyjnego
 config = open('dbconfig.json')
 configData = json.load(config)
 
-recipes_counter = configData["Recipes create number"]
-ingredients_counter = configData["Ingredients create number"]
+#recipes_counter = configData["Recipes create number"]
+#ingredients_counter = configData["Ingredients create number"]
+
 
 consumer_key = '53c67ce11c5443218bb25a81c64931ad'
 consumer_secret = '609224f5084243ab83e92876a927c87c'
@@ -29,7 +48,7 @@ def generate_random_food_ids(num_ids):
 
 
 # Wygenerowanie 100 losowych ID składników
-num_ingredients = ingredients_counter
+num_ingredients = 15
 random_food_ids = generate_random_food_ids(num_ingredients)
 
 # Lista na informacje o składnikach
@@ -74,6 +93,13 @@ with open('data.json', 'w', encoding='utf-8') as f:
 ingredient_names = [ingredient_info['Name'] for ingredient_info in ingredients_data]
 with open('ingredients_list.json', 'w', encoding='utf-8') as f:
     json.dump(ingredient_names, f, ensure_ascii=False, indent=4)
+
+#generator AI
+recipes = generatorAI.generate_recipes(ingredient_names,2,client,headers)
+generatorAI.display_recipes(recipes)
+#-----------------------------------------------
+
+
 
 #-------------------------------------------------------------------------------------------------------------------
 
