@@ -3,16 +3,23 @@ import json
 
 
 class Field:
-    def __init__(self, name, type, nullable, isPrimaryKey, FKRefrences):
+    def __init__(self, name, type, nullable, isUnique, default, isPrimaryKey, FKRefrences):
         self.name = name
         self.type = type
         self.nullable = nullable
+        self.isUnique = isUnique
+        self.default = default
         self.isPrimaryKey = isPrimaryKey
         self.FKRefrences = FKRefrences
 
+    def set_type(self, type):
+        self.type = type
+    def set_nullable(self, nullable):
+        self.nullable = nullable
+    def set_unique(self, isUnique):
+        self.isUnique = isUnique
     def set_primary(self, isPrimaryKey):
         self.isPrimaryKey = isPrimaryKey
-
     def set_FK(self, FKRefrences):
         self.FKRefrences = FKRefrences
 
@@ -54,25 +61,42 @@ for line in lines:
                 fieldtype = fieldqparsed[1]
                 isNullable = True
                 isPrimaryKey = False
+                isUnique = False
+                default = None
                 FK = None
+                fieldqparsed = [x.lower() for x in fieldqparsed] #make all strings in list lowercase
+                #print(fieldqparsed)
                 if len(fieldqparsed) > 2:
-                    if "not" in fieldqparsed[2].lower() and "null" in fieldqparsed[3].lower():
+                    if "null" in fieldqparsed:
                         isNullable = False
-                    elif "primary" in fieldqparsed[2].lower() and "key" in fieldqparsed[3].lower():
+                    if "primary" in fieldqparsed:
                         isPrimaryKey = True
-                fields.append(Field(fieldname, fieldtype, isNullable, isPrimaryKey, FK))
+                        isNullable = False
+                        isUnique = True
+                    if "unique" in fieldqparsed:
+                        isUnique = True
+                    if "identity" in fieldqparsed:
+                       print("identity TODO")
+                    elif "default" in fieldqparsed:
+                        default = fieldqparsed[fieldqparsed.index("default") + 1] #get value after default
+                        if default[0] == '\'' and default[-1] == '\'':
+                            default = default[1:-1]  # remove '' from strings
+                        print(default)
+                fields.append(Field(fieldname, fieldtype, isNullable, isUnique, default, isPrimaryKey, FK))
             else:
                 if "primary" in fieldqparsed[0].lower() and "key" in fieldqparsed[1].lower():
                     primaryKeysField = fieldqparsed[2]
-                    if primaryKeysField[0] == '(' and primaryKeysField[-1:] == ')':
+                    if primaryKeysField[0] == '(' and primaryKeysField[-1] == ')':
                         primaryKeysField = primaryKeysField[1:-1] # remove ( and )
                     else: raise RuntimeError("SQL syntax error")
                     primaryKeys = primaryKeysField.split(',')
-                    for pk in primaryKeys:
+                    for pk in primaryKeys:  #find field and set it to primary key
                         pk = pk.lstrip()
                         for field in fields:
                             if field.name == pk:
                                 field.set_primary(True)
+                                field.set_nullable(False)
+                                field.set_unique(True)
                                 break
         tables.append(Table(TableName, fields))
     else:
@@ -83,11 +107,41 @@ for line in lines:
             if "add" in parsed[0].lower() and "constraint" in parsed[1].lower():
                 parsed = parsed[2]
                 parsed = parsed.split(' ', 3)
-                if "foreign" in parsed[1].lower() and "key" in parsed[2].lower():
+                if "unique" in parsed[1].lower():
+                    #print(parsed)
+                    fieldName = parsed[2]
+                    if fieldName[0] == '(' and fieldName[-1] == ')':
+                        fieldName = fieldName[1:-1]  # remove ( and )
+                    else:
+                        raise RuntimeError("SQL syntax error")
+                    for table in tables:
+                        if table.name == tableName:
+                            for field in table.fields:
+                                if field.name == fieldName:
+                                    field.set_unique(True)
+                                    break
+                            break
+                elif "default" in parsed[1].lower():
+                    #print(parsed)
+                    default = parsed[2]
+                    if default[0] == '\'' and default[-1] == '\'':
+                        default = default[1:-1]  # remove '' from strings
+                    parsed = parsed[3]
+                    parsed = parsed.split(' ')
+                    if "for" not in parsed[0].lower(): raise RuntimeError("SQL syntax error")
+                    fieldName = parsed[1]
+                    for table in tables:
+                        if table.name == tableName:
+                            for field in table.fields:
+                                if field.name == fieldName:
+                                    field.default = default
+                                    break
+                            break
+                elif "foreign" in parsed[1].lower() and "key" in parsed[2].lower():
                     parsed = parsed[3]
                     parsed = parsed.split(' ')
                     fieldName = parsed[0]
-                    if fieldName[0] == '(' and fieldName[-1:] == ')':
+                    if fieldName[0] == '(' and fieldName[-1] == ')':
                         fieldName = fieldName[1:-1]  # remove ( and )
                     else: raise RuntimeError("SQL syntax error")
                     if "references" not in parsed[1].lower():
@@ -115,6 +169,21 @@ for line in lines:
                                 if field.name == fieldName:
                                     field.set_FK([ReferenceFieldName, ReferenceTableName])
                                     field.set_primary(False)
+                                    break
+                            break
+            elif "alter" in parsed[0].lower() and "column" in parsed[1].lower():
+                parsed = parsed[2]
+                parsed = parsed.split(' ', 3)
+                #print(parsed)
+                if "not" in parsed[2].lower() and "null" in parsed[3].lower():
+                    fieldName = parsed[0]
+                    datatype = parsed[1]
+                    for table in tables:
+                        if table.name == tableName:
+                            for field in table.fields:
+                                if field.name == fieldName:
+                                    field.set_type(datatype)
+                                    field.set_nullable(False)
                                     break
                             break
 
@@ -154,11 +223,17 @@ for table in tables:
     print(table.name)
     for field in table.fields:
         msg = field.name + ": " + field.type
+        if field.FKRefrences is not None:
+            msg += " FK References " + field.FKRefrences[0] + " in " + field.FKRefrences[1]
         if field.isPrimaryKey:
             msg += " PK"
-        elif field.FKRefrences is not None:
-            msg += " FK References " + field.FKRefrences[0] + " in " + field.FKRefrences[1]
-        elif not field.nullable:
-            msg += " not null"
+        else:
+            if not field.nullable:
+                msg += " not null"
+            if field.isUnique:
+                msg += " unique"
+            if field.default is not None:
+                msg += " default " + field.default
+
         print(msg)
     print()
