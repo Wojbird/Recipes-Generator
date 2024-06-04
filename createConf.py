@@ -3,14 +3,14 @@ import json
 
 
 class Field:
-    def __init__(self, name, type, nullable, isUnique, default, isPrimaryKey, FKRefrences):
+    def __init__(self, name, type, nullable, isUnique, default, isPrimaryKey, FKReferences):
         self.name = name
         self.type = type
         self.nullable = nullable
         self.isUnique = isUnique
         self.default = default
         self.isPrimaryKey = isPrimaryKey
-        self.FKRefrences = FKRefrences
+        self.FKReferences = FKReferences
 
     def set_type(self, type):
         self.type = type
@@ -20,8 +20,8 @@ class Field:
         self.isUnique = isUnique
     def set_primary(self, isPrimaryKey):
         self.isPrimaryKey = isPrimaryKey
-    def set_FK(self, FKRefrences):
-        self.FKRefrences = FKRefrences
+    def set_FK(self, FKReferences):
+        self.FKReferences = FKReferences
 
 class Table:
     def __init__(self, name, fields):
@@ -198,11 +198,12 @@ dbconfig = {
                         {
 
                             "Field name": field.name,
-                            "Data type":
-                                field.type + " PK" if field.isPrimaryKey else
-                                field.type + " FK References " + field.FKRefrences[0] + " in " + field.FKRefrences[1] if field.isPrimaryKey else
-                                field.type + " not null" if not field.nullable else
-                                field.type,
+                            "Data type": field.type,
+                            "Nullable": field.nullable,
+                            "Is unique": field.isUnique,
+                            "Default": field.default,
+                            "Is PK": field.isPrimaryKey,
+                            "FK References": field.FKReferences,
                             "Validation (regex/code)": "None",
                             "Max length": "None",
                             "Min length": "None",
@@ -223,8 +224,8 @@ for table in tables:
     print(table.name)
     for field in table.fields:
         msg = field.name + ": " + field.type
-        if field.FKRefrences is not None:
-            msg += " FK References " + field.FKRefrences[0] + " in " + field.FKRefrences[1]
+        if field.FKReferences is not None:
+            msg += " FK References " + field.FKReferences[0] + " in " + field.FKReferences[1]
         if field.isPrimaryKey:
             msg += " PK"
         else:

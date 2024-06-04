@@ -1,6 +1,9 @@
 import sys
 import random
 import json
+import os
+import shutil
+import subprocess
 
 # takie cos bo mi sie cos jebało i to pomogło
 # sys.path.insert(0, 'C:\\Users\\Wiktoria\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages')
@@ -13,12 +16,14 @@ consumer_secret = '609224f5084243ab83e92876a927c87c'
 # Create a Fatsecret session
 fs = Fatsecret(consumer_key, consumer_secret)
 
+
 # Funkcja do generowania losowych ID składników
 def generate_random_food_ids(num_ids):
     food_ids = set()
     while len(food_ids) < num_ids:
         food_ids.add(random.randint(1, 300000))  # Zakres ID dostępny w API FatSecret
     return list(food_ids)
+
 
 # Wygenerowanie 100 losowych ID składników
 num_ingredients = 20
@@ -69,23 +74,176 @@ with open('ingredients_list.json', 'w', encoding='utf-8') as f:
 
 #-------------------------------------------------------------------------------------------------------------------
 
+#kopiowanie txt
+source_sql = open('input.txt', 'r')
+destination_sql = open('output.txt', 'w')
+
+for line in source_sql:
+    destination_sql.write(line)
+
+source_sql.close()
+
 #wczytywanie pliku konfiguracyjnego
 config = open('dbconfig.json')
 configData = json.load(config)
 
 for tab in configData["Tables"]:
-    tableName = tab["Table name"]
-
+    # tableName = tab["Table name"]
     # ...
-    print("\n" + "{}:".format(tab["Table name"]))
+    # print("\n" + "{}:".format(tab["Table name"]))
     # ...
 
-    for fld in tab["Fields"]:
-        fieldsName = fld["Field name"]
+    match tab["Table name"]:
+        case "Recipes":
+            fields = ""
+            values = ""
+            for fld in tab["Fields"]:
+                # fieldsName = fld["Field name"]
+                # ...
+                # print("\t" + "{}".format(fld["Field name"]))
+                # ...
+                if fields != "":
+                    fields += ", "
+                    values += ", "
+                fields += fld["Field name"]
 
-        # ...
-        print("\t" + "{}".format(fld["Field name"]))
-        # ...
+                validation = fld["Validation (regex/code)"]
+                max_length = fld["Max length"]
+                min_length = fld["Min length"]
+                excluded = fld["Excluded"]
+                must_have = fld["Must have"]
+                nullable = fld["Nullable"]
+                default = fld["Default"]
+                is_PK = fld["Is PK"]
+                FK_references = fld["FK References"]
 
+                if "char" in fld["Data type"]:
+                    values += "A"
+                elif "integer" in fld["Data type"]:
+                    values += "1"
+                elif "float" in fld["Data type"]:
+                    values += "0.1"
+                elif "bit" in fld["Data type"]:
+                    values += "true"
+                elif "time" in fld["Data type"]:
+                    values += "01:00:00"
+
+            destination_sql.write("INSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
+
+        case "Ingredients":
+            fields = ""
+            values = ""
+            for fld in tab["Fields"]:
+                # fieldsName = fld["Field name"]
+                # ...
+                # print("\t" + "{}".format(fld["Field name"]))
+                # ...
+                if fields != "":
+                    fields += ", "
+                    values += ", "
+                fields += fld["Field name"]
+
+                validation = fld["Validation (regex/code)"]
+                max_length = fld["Max length"]
+                min_length = fld["Min length"]
+                excluded = fld["Excluded"]
+                must_have = fld["Must have"]
+                nullable = fld["Nullable"]
+                default = fld["Default"]
+                is_PK = fld["Is PK"]
+                FK_references = fld["FK References"]
+
+                if "char" in fld["Data type"]:
+                    values += "A"
+                elif "integer" in fld["Data type"]:
+                    values += "1"
+                elif "float" in fld["Data type"]:
+                    values += "0.1"
+                elif "bit" in fld["Data type"]:
+                    values += "true"
+                elif "time" in fld["Data type"]:
+                    values += "01:00:00"
+
+            destination_sql.write("INSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
+
+        case "Steps":
+            fields = ""
+            values = ""
+            for fld in tab["Fields"]:
+                # fieldsName = fld["Field name"]
+                # ...
+                # print("\t" + "{}".format(fld["Field name"]))
+                # ...
+                if fields != "":
+                    fields += ", "
+                    values += ", "
+                fields += fld["Field name"]
+
+                validation = fld["Validation (regex/code)"]
+                max_length = fld["Max length"]
+                min_length = fld["Min length"]
+                excluded = fld["Excluded"]
+                must_have = fld["Must have"]
+                nullable = fld["Nullable"]
+                default = fld["Default"]
+                is_PK = fld["Is PK"]
+                FK_references = fld["FK References"]
+
+                if "char" in fld["Data type"]:
+                    values += "A"
+                elif "integer" in fld["Data type"]:
+                    values += "1"
+                elif "float" in fld["Data type"]:
+                    values += "0.1"
+                elif "bit" in fld["Data type"]:
+                    values += "true"
+                elif "time" in fld["Data type"]:
+                    values += "01:00:00"
+
+            destination_sql.write("INSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
+
+        case _:
+            fields = ""
+            values = ""
+            for fld in tab["Fields"]:
+                # fieldsName = fld["Field name"]
+                # ...
+                # print("\t" + "{}".format(fld["Field name"]))
+                # ...
+                if fields != "":
+                    fields += ", "
+                    values += ", "
+                fields += fld["Field name"]
+
+                validation = fld["Validation (regex/code)"]
+                max_length = fld["Max length"]
+                min_length = fld["Min length"]
+                excluded = fld["Excluded"]
+                must_have = fld["Must have"]
+                nullable = fld["Nullable"]
+                default = fld["Default"]
+                is_PK = fld["Is PK"]
+                FK_refrences = fld["FK Refrences"]
+
+                if "char" in fld["Data type"]:
+                    values += "A"
+                elif "integer" in fld["Data type"]:
+                    values += "1"
+                elif "float" in fld["Data type"]:
+                    values += "0.1"
+                elif "bit" in fld["Data type"]:
+                    values += "true"
+                elif "time" in fld["Data type"]:
+                    values += "01:00:00"
+
+            destination_sql.write("INSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
+
+    # for fld in tab["Fields"]:
+    #     fieldsName = fld["Field name"]
+    #
+    #     # ...
+    #     print("\t" + "{}".format(fld["Field name"]))
+    #     # ...
 
 config.close()
+destination_sql.close()
