@@ -89,20 +89,12 @@ source_sql.close()
 #AI gen
 
 for tab in configData["Tables"]:
-    # tableName = tab["Table name"]
-    # ...
-    # print("\n" + "{}:".format(tab["Table name"]))
-    # ...
 
     match tab["Table name"]:
         case "Recipes":
             fields = ""
             values = ""
             for fld in tab["Fields"]:
-                # fieldsName = fld["Field name"]
-                # ...
-                # print("\t" + "{}".format(fld["Field name"]))
-                # ...
                 if fields != "":
                     fields += ", "
                     values += ", "
