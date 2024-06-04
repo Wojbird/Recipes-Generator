@@ -189,6 +189,8 @@ for line in lines:
 
 
 dbconfig = {
+    "Recipes create number": 2,
+    "Ingredients create number": 15,
     "Tables":
         [
             {
@@ -198,7 +200,7 @@ dbconfig = {
                         {
 
                             "Field name": field.name,
-                            "Data type": field.type,
+                            "Type": field.type,
                             "Nullable": field.nullable,
                             "Is unique": field.isUnique,
                             "Default": field.default,
