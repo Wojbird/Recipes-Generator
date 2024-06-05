@@ -5,6 +5,8 @@ import json
 # sys.path.insert(0, 'C:\\Users\\wojma\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fatsecret')
 from fatsecret import Fatsecret
 from openai import OpenAI
+from openai.resources.beta.threads.runs import steps
+
 import generatorAI
 
 #klucze do generator AI potrzebne do działania funkcji generatorAI.generate_recipes-----------------------------------------------------------
@@ -146,6 +148,12 @@ for tab in configData["Tables"]:
                         fields += ", "
                         values += ", "
                     fields += fld["Field name"]
+
+                    if fld["Field name"] == "Name":
+                        values += recipes[x]["name"]
+                    if fld["Field name"] == "Image":
+                        values += "null"
+
                     if "char" in fld["Type"]:
                         values += "A"
                     elif "integer" in fld["Type"]:
@@ -182,7 +190,7 @@ for tab in configData["Tables"]:
                     fields += fld["Field name"]
 
                     if fld["Field name"] == "Name":
-                        values += "AI [x]"
+                        values += ingredient_names[x]
 
                     if "char" in fld["Type"]:
                         values += "A"
@@ -214,6 +222,14 @@ for tab in configData["Tables"]:
                     is_PK = fld["Is PK"]
                     FK_references = fld["FK References"]
 
+                    if fields != "":
+                        fields += ", "
+                        values += ", "
+                    fields += fld["Field name"]
+
+                    # if fld["Field name"] == "Name":
+                    #     values += recipes[][steps][x]
+
                     if "char" in fld["Type"]:
                         values += "A"
                     elif "integer" in fld["Type"]:
@@ -244,6 +260,11 @@ for tab in configData["Tables"]:
                         default = fld["Default"]
                         is_PK = fld["Is PK"]
                         FK_references = fld["FK References"]
+
+                        if fields != "":
+                            fields += ", "
+                            values += ", "
+                        fields += fld["Field name"]
 
                         if "char" in fld["Type"]:
                             values += "A"
