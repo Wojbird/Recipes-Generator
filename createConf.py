@@ -3,7 +3,7 @@ import json
 
 
 class Field:
-    def __init__(self, name, type, nullable, isUnique, default, isPrimaryKey, FKReferences):
+    def __init__(self, name, type, nullable, isUnique, default, autoIncrement, startWith, incrementBy, isPrimaryKey, FKReferences):
         self.name = name
         self.type = type
         self.nullable = nullable
@@ -11,6 +11,9 @@ class Field:
         self.default = default
         self.isPrimaryKey = isPrimaryKey
         self.FKReferences = FKReferences
+        self.startWith = startWith
+        self.incrementBy = incrementBy
+        self.autoIncrement = autoIncrement
 
     def set_type(self, type):
         self.type = type
@@ -60,9 +63,12 @@ for line in lines:
                 fieldname = fieldqparsed[0]
                 fieldtype = fieldqparsed[1]
                 isNullable = True
-                isPrimaryKey = False
                 isUnique = False
                 default = None
+                autoIncrement = False
+                startWith = None
+                incrementBy = None
+                isPrimaryKey = False
                 FK = None
                 fieldqparsed = [x.lower() for x in fieldqparsed] #make all strings in list lowercase
                 #print(fieldqparsed)
@@ -76,13 +82,48 @@ for line in lines:
                     if "unique" in fieldqparsed:
                         isUnique = True
                     if "identity" in fieldqparsed:
-                       print("identity TODO")
+                        autoIncrement = True
+                        fieldqparsed = [s.replace('(', '') for s in fieldqparsed] # remove (
+                        for v in fieldqparsed:  # remove ) and split last value
+                            if ')' in v:
+                                nfqp = [s.replace(')', '') for s in fieldqparsed]
+                                last = nfqp[-1].split(' ')
+                                nfqp = nfqp[:-1]
+                                nfqp = nfqp + last
+                                fieldqparsed = nfqp
+                                break
+                        print(fieldqparsed)
+                        #handle (starts with x increment by y) sytnax
+                        if "start" in fieldqparsed or "increment" in fieldqparsed:
+                            if "start" in fieldqparsed:
+                                startWith = fieldqparsed[fieldqparsed.index("start") + 2]
+                            if "increment" in fieldqparsed:
+                                incrementBy = fieldqparsed[fieldqparsed.index("increment") + 2]
+                        else:
+                            #handle (x, y) syntax
+                            if fieldqparsed[fieldqparsed.index("identity") + 2] is not None:
+                                fieldqparsed = [s.replace(',', '') for s in fieldqparsed]
+                                startWith = fieldqparsed[fieldqparsed.index("identity") + 1]
+                                incrementBy = fieldqparsed[fieldqparsed.index("identity") + 2]
+                            else: raise RuntimeError("SQL syntax error")
                     elif "default" in fieldqparsed:
                         default = fieldqparsed[fieldqparsed.index("default") + 1] #get value after default
                         if default[0] == '\'' and default[-1] == '\'':
                             default = default[1:-1]  # remove '' from strings
-                        print(default)
-                fields.append(Field(fieldname, fieldtype, isNullable, isUnique, default, isPrimaryKey, FK))
+                        #print(default)
+                    #handle identity(x, y) case (no whitespace between identity and '(' symbol)
+                    for val in fieldqparsed:
+                        autoIncrement = True
+                        if "identity(" in val:
+                            identity = fieldqparsed[-1]
+                            identity = identity.split('(')
+                            identity = identity[-1]
+                            identity = identity.split(',')
+                            identity = [s.replace(')', '') for s in identity]
+                            startWith = identity[0].strip()
+                            incrementBy = identity[1].strip()
+                            print(identity)
+                fields.append(Field(fieldname, fieldtype, isNullable, isUnique, default, autoIncrement, startWith, incrementBy, isPrimaryKey, FK))
             else:
                 if "primary" in fieldqparsed[0].lower() and "key" in fieldqparsed[1].lower():
                     primaryKeysField = fieldqparsed[2]
@@ -237,6 +278,11 @@ for table in tables:
                 msg += " unique"
             if field.default is not None:
                 msg += " default " + field.default
-
+        if field.autoIncrement:
+            msg += " Auto Increment"
+        if field.startWith is not None:
+            msg += " start with " + field.startWith
+        if field.incrementBy is not None:
+            msg += " increment by " + field.incrementBy
         print(msg)
     print()
