@@ -232,6 +232,7 @@ for line in lines:
 dbconfig = {
     "Recipes create number": 2,
     "Ingredients create number": 15,
+    "Other tables create number": 10,
     "Tables":
         [
             {
@@ -243,8 +244,11 @@ dbconfig = {
                             "Field name": field.name,
                             "Type": field.type,
                             "Nullable": field.nullable,
-                            "Is unique": field.isUnique,
+                            "Unique": field.isUnique,
                             "Default": field.default,
+                            "Auto increment": field.auto_increment,
+                            "Start with": field.start_with,
+                            "Increment by": field.increment_by,
                             "Is PK": field.isPrimaryKey,
                             "FK References": field.FKReferences,
                             "Validation (regex/code)": "None",

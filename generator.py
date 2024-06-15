@@ -30,10 +30,11 @@ headers = {
 config = open('dbconfig.json')
 configData = json.load(config)
 
+
 recipes_counter = int(configData["Recipes create number"])
 ingredients_counter = int(configData["Ingredients create number"])
-steps_counter = range(1)
-counter = range(1)
+other_tables_counter = int(configData["Other tables create number"])
+
 
 #recipes_counter = configData["Recipes create number"]
 #ingredients_counter = configData["Ingredients create number"]
@@ -123,8 +124,26 @@ source_sql.close()
 
 recipes_counter = range(recipes_counter)
 ingredients_counter = range(ingredients_counter)
+other_tables_counter = range(other_tables_counter)
 steps_counter = range(1)
 counter = range(1)
+
+# for recipe in recipes_counter:
+#
+#     destination_sql.write("\nINSERT INTO " + "Recipes (" + fields + ") VALUES(" + values + ");")
+#     for step in steps_counter:
+#
+#         destination_sql.write("\nINSERT INTO " + "Steps (" + fields + ") VALUES(" + values + ");")
+#         for ingredient in ingredients_counter:
+#
+#             destination_sql.write("\nINSERT INTO " + "Ingredients_Steps (" + fields + ") VALUES(" + values + ");")
+#     for ingredient in ingredients_counter:
+#
+#         destination_sql.write("\nINSERT INTO " + "Ingredients (" + fields + ") VALUES(" + values + ");")
+#
+#
+# for z in other_tables_counter:
+
 
 for tab in configData["Tables"]:
 
