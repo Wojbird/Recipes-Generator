@@ -113,8 +113,8 @@ for line in lines:
                         #print(default)
                     #handle identity(x, y) case (no whitespace between identity and '(' symbol)
                     for val in fieldqparsed:
-                        autoIncrement = True
                         if "identity(" in val:
+                            autoIncrement = True
                             identity = fieldqparsed[-1]
                             identity = identity.split('(')
                             identity = identity[-1]
@@ -246,9 +246,9 @@ dbconfig = {
                             "Nullable": field.nullable,
                             "Unique": field.isUnique,
                             "Default": field.default,
-                            "Auto increment": field.auto_increment,
-                            "Start with": field.start_with,
-                            "Increment by": field.increment_by,
+                            "Auto increment": field.autoIncrement,
+                            "Start with": field.startWith,
+                            "Increment by": field.incrementBy,
                             "Is PK": field.isPrimaryKey,
                             "FK References": field.FKReferences,
                             "Validation (regex/code)": "None",
