@@ -30,11 +30,9 @@ headers = {
 config = open('dbconfig.json')
 configData = json.load(config)
 
-
 recipes_counter = int(configData["Recipes create number"])
 ingredients_counter = int(configData["Ingredients create number"])
 other_tables_counter = int(configData["Other tables create number"])
-
 
 #recipes_counter = configData["Recipes create number"]
 #ingredients_counter = configData["Ingredients create number"]
@@ -103,10 +101,9 @@ with open('ingredients_list.json', 'w', encoding='utf-8') as f:
     json.dump(ingredient_names, f, ensure_ascii=False, indent=4)
 
 #generator AI
-recipes = generatorAI.generate_recipes(ingredient_names,ingredients_counter,client,headers)
+recipes = generatorAI.generate_recipes(ingredient_names, ingredients_counter, client, headers)
 generatorAI.display_recipes(recipes)
 #-----------------------------------------------
-
 
 
 #-------------------------------------------------------------------------------------------------------------------
@@ -122,218 +119,146 @@ source_sql.close()
 
 #AI gen
 
-recipes_counter = range(recipes_counter)
-ingredients_counter = range(ingredients_counter)
-other_tables_counter = range(other_tables_counter)
+# recipes_counter = range(recipes_counter)
+# ingredients_counter = range(ingredients_counter)
+# other_tables_counter = range(other_tables_counter)
 steps_counter = range(1)
 counter = range(1)
 
-# for recipe in recipes_counter:
-#
-#     destination_sql.write("\nINSERT INTO " + "Recipes (" + fields + ") VALUES(" + values + ");")
-#     for step in steps_counter:
-#
-#         destination_sql.write("\nINSERT INTO " + "Steps (" + fields + ") VALUES(" + values + ");")
-#         for ingredient in ingredients_counter:
-#
-#             destination_sql.write("\nINSERT INTO " + "Ingredients_Steps (" + fields + ") VALUES(" + values + ");")
-#     for ingredient in ingredients_counter:
-#
-#         destination_sql.write("\nINSERT INTO " + "Ingredients (" + fields + ") VALUES(" + values + ");")
-#
-#
-# for z in other_tables_counter:
+#-----------------------------------------------------------------------------------------------------------------------
 
+database = {
+    "Tables":
+        [
+            {
+                "Table name": tab["Table name"],
+                "Columns":
+                    [
+                        {
+                            "Column name": col["Field name"],
+                            "Data list":
+                                [
+                                    {
+                                        "List":
+                                        {
+                                            "List":
+                                            {
+                                                "Data": recipes[recipe]["name"],
+                                            } if (col["Field name"] == "Name") else
+                                            {
+                                                {
+                                                    {
+                                                        {
+                                                            "Data": 0,  #pierwsza wartość PK, dodać pozostałe warunki
+                                                        } if recipe - 1 == 0 else
+                                                        {
+                                                            "Data": database[tab["Table name"]][col["Field name"]][recipes[recipe]["name"]][recipe - 1] + 1,
+                                                            #inkrementacja, dodać pozostałe warunki
+                                                        }
+                                                    } if "integer" in col["Type"] else
+                                                    {
+                                                        {
+                                                            "Data": "a",  #pierwsza wartość PK, dodać pozostałe warunki
+                                                        } if recipe - 1 == 0 else
+                                                        {
+                                                            "Data": chr(ord(database[tab["Table name"]][col["Field name"]][recipes[recipe]["name"]][recipe - 1]) + 1),
+                                                            #inkrementacja, dodać pozostałe warunki
+                                                        }
+                                                    } if "char" in col["Type"][
+                                                        "Type"] else "" and print("Wrong PK datatype!") and quit()
+                                                }
+                                            } if (col["Unique"] == "true") else
+                                            {
+                                                "Data": "NULL",
+                                                #dorobić sprawdzanie i uzupełnianie (może w nowym loopie)!!!
+                                            } if (col["FK References"] != "null") else
+                                            {
+                                                {
+                                                    "Data": col["Default"],
+                                                } if (col["Default"] != "null") else
+                                                {
+                                                    "Data": "NULL",
+                                                } if (col["Nullable"] != "null") else
+                                                {
+                                                    {
+                                                        "Data": random.choice(string.ascii_letters)
+                                                    } if "char" in col["Type"] else
+                                                    {
+                                                        "Data": random.choice(string.ascii_letters)
+                                                    } if "varchar" in col["Type"] else
+                                                    {
+                                                        "Data": "00:00:00",
+                                                    } if "time" in col["Type"] else
+                                                    {
+                                                        "Data": random.randint(0, 1000),
+                                                    } if "integer" in col["Type"] else
+                                                    {
+                                                        "Data": random.uniform(0, 1000),
+                                                    } if "float" in col["Type"] else
+                                                    {
+                                                        "Data": random.uniform(0, 1000), #sprawdzić czy nie ma dla double?
+                                                    } if "double" in col["Type"] else
+                                                    {
+                                                        "Data": decimal.Decimal(random.randint(0, 1000)/pow(10, random.randint(0, 3))),
+                                                    } if "decimal" in col["Type"] else
+                                                    {
+                                                        "Data": "",
+                                                    }
+                                                }
+                                            }
+                                        } for recipe in range(recipes_counter)
+                                    } if (tab["Table name"] == "Recipes") else ""
+                                    # {
+                                    #     {
+                                    #         {
+                                    #             #----------
+                                    #         } if (col["Field name"] == "Name") else ""
+                                    #     } for recipe in ingredients_counter
+                                    # } if (tab["Table name"] == "Ingredients") else
+                                    # {
+                                    #     {
+                                    #         {
+                                    #             #----------
+                                    #         } if (col["Field name"] == "Name") else ""
+                                    #     } for recipe in steps_counter
+                                    # } if (tab["Table name"] == "Steps") else
+                                    # {
+                                    #     {
+                                    #         {
+                                    #             #----------
+                                    #         } if (col["Field name"] == "Name") else ""
+                                    #     } for recipe in recipes_counter
+                                    # } if (tab["Table name"] == "Ingredients_Steps") else
+                                    # {
+                                    #     {
+                                    #         {
+                                    #             {
+                                    #                 "Data": col["Default"],
+                                    #             } if (col["Default"] != "null") else
+                                    #             {
+                                    #                 "Data": "NULL",
+                                    #             } if (col["Nullable"] != "null") else
+                                    #             {
+                                    #                 #----------
+                                    #             }
+                                    #         } if (col["Field name"] == "Name") else ""
+                                    #     } for recipe in counter
+                                    # }
+                                ]
+                        } for col in tab["Fields"]
+                    ]
+            } for tab in configData["Tables"]
+        ]
+}
 
-for tab in configData["Tables"]:
-
-    match tab["Table name"]:
-        case "Recipes":
-            for x in recipes_counter:
-                fields = ""
-                values = ""
-                for fld in tab["Fields"]:
-                    validation = fld["Validation (regex/code)"]
-                    max_length = fld["Max length"]
-                    min_length = fld["Min length"]
-                    excluded = fld["Excluded"]
-                    must_have = fld["Must have"]
-                    nullable = fld["Nullable"]
-                    default = fld["Default"]
-                    is_PK = fld["Is PK"]
-                    FK_references = fld["FK References"]
-
-                    if fields != "":
-                        fields += ", "
-                        values += ", "
-                    fields += fld["Field name"]
-
-                    if fld["Field name"] == "Name":
-                        values += recipes[x]["name"]
-                    if fld["Field name"] == "Image":
-                        values += "null"
-
-                    if "char" in fld["Type"]:
-                        values += "A"
-                    elif "integer" in fld["Type"]:
-                        values += "1"
-                    elif "float" in fld["Type"]:
-                        values += "0.1"
-                    elif "bit" in fld["Type"]:
-                        values += "true"
-                    elif "decimal(3, 0)" in fld["Type"]:
-                        values += "0.100"
-                    elif "time" in fld["Type"]:
-                        values += "01-00-00"
-
-                destination_sql.write("\nINSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
-
-        case "Ingredients":
-            for x in ingredients_counter:
-                fields = ""
-                values = ""
-                for fld in tab["Fields"]:
-                    validation = fld["Validation (regex/code)"]
-                    max_length = fld["Max length"]
-                    min_length = fld["Min length"]
-                    excluded = fld["Excluded"]
-                    must_have = fld["Must have"]
-                    nullable = fld["Nullable"]
-                    default = fld["Default"]
-                    is_PK = fld["Is PK"]
-                    FK_references = fld["FK References"]
-
-                    if fields != "":
-                        fields += ", "
-                        values += ", "
-                    fields += fld["Field name"]
-
-                    if fld["Field name"] == "Name":
-                        values += ingredient_names[x]
-
-                    if "char" in fld["Type"]:
-                        values += "A"
-                    elif "integer" in fld["Type"]:
-                        values += "1"
-                    elif "float" in fld["Type"]:
-                        values += "0.1"
-                    elif "bit" in fld["Type"]:
-                        values += "true"
-                    elif "decimal(3, 0)" in fld["Type"]:
-                        values += "0.100"
-                    elif "time" in fld["Type"]:
-                        values += "01-00-00"
-
-                destination_sql.write("\nINSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
-
-        case "Steps":
-            for x in steps_counter:
-                fields = ""
-                values = ""
-                for fld in tab["Fields"]:
-                    validation = fld["Validation (regex/code)"]
-                    max_length = fld["Max length"]
-                    min_length = fld["Min length"]
-                    excluded = fld["Excluded"]
-                    must_have = fld["Must have"]
-                    nullable = fld["Nullable"]
-                    default = fld["Default"]
-                    is_PK = fld["Is PK"]
-                    FK_references = fld["FK References"]
-
-                    if fields != "":
-                        fields += ", "
-                        values += ", "
-                    fields += fld["Field name"]
-
-                    # if fld["Field name"] == "Name":
-                    #     values += recipes[][steps][x]
-
-                    if "char" in fld["Type"]:
-                        values += "A"
-                    elif "integer" in fld["Type"]:
-                        values += "1"
-                    elif "float" in fld["Type"]:
-                        values += "0.1"
-                    elif "bit" in fld["Type"]:
-                        values += "true"
-                    elif "decimal(3, 0)" in fld["Type"]:
-                        values += "0.100"
-                    elif "time" in fld["Type"]:
-                        values += "01-00-00"
-
-                destination_sql.write("\nINSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
-
-        case "Ingredients_Steps":
-            for x in ingredients_counter:
-                for y in steps_counter:
-                    fields = ""
-                    values = ""
-                    for fld in tab["Fields"]:
-                        validation = fld["Validation (regex/code)"]
-                        max_length = fld["Max length"]
-                        min_length = fld["Min length"]
-                        excluded = fld["Excluded"]
-                        must_have = fld["Must have"]
-                        nullable = fld["Nullable"]
-                        default = fld["Default"]
-                        is_PK = fld["Is PK"]
-                        FK_references = fld["FK References"]
-
-                        if fields != "":
-                            fields += ", "
-                            values += ", "
-                        fields += fld["Field name"]
-
-                        if "char" in fld["Type"]:
-                            values += "A"
-                        elif "integer" in fld["Type"]:
-                            values += "1"
-                        elif "float" in fld["Type"]:
-                            values += "0.1"
-                        elif "bit" in fld["Type"]:
-                            values += "true"
-                        elif "decimal(3, 0)" in fld["Type"]:
-                            values += "0.100"
-                        elif "time" in fld["Type"]:
-                            values += "01-00-00"
-
-                    destination_sql.write("\nINSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
-
-        case _:
-            for x in counter:
-                fields = ""
-                values = ""
-                for fld in tab["Fields"]:
-                    validation = fld["Validation (regex/code)"]
-                    max_length = fld["Max length"]
-                    min_length = fld["Min length"]
-                    excluded = fld["Excluded"]
-                    must_have = fld["Must have"]
-                    nullable = fld["Nullable"]
-                    default = fld["Default"]
-                    is_PK = fld["Is PK"]
-                    FK_references = fld["FK References"]
-
-                    if fields != "":
-                        fields += ", "
-                        values += ", "
-                    fields += fld["Field name"]
-
-                    if "char" in fld["Type"]:
-                        values += "A"
-                    elif "integer" in fld["Type"]:
-                        values += "1"
-                    elif "float" in fld["Type"]:
-                        values += "0.1"
-                    elif "bit" in fld["Type"]:
-                        values += "true"
-                    elif "decimal(3, 0)" in fld["Type"]:
-                        values += "0.100"
-                    elif "time" in fld["Type"]:
-                        values += "01-00-00"
-
-                destination_sql.write("\nINSERT INTO " + tab["Table name"] + "(" + fields + ") VALUES(" + values + ");")
+for tab in database["Tables"]:
+    for col in tab["Columns"]:
+        for data in col["Data list"]:
+            print(data_str["List"]["List"]["Data"])
+            destination_sql.write(
+                "\nINSERT INTO " + tab["Table name"] + "(" + col["Column name"] + ") VALUES(" +
+                "data" + ");"
+            )
 
 config.close()
 destination_sql.close()
