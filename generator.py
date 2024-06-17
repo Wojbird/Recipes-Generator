@@ -33,6 +33,9 @@ headers = {
 config = open('dbconfig.json')
 configData = json.load(config)
 
+recipes_counter = 0
+ingredients_counter = 0
+
 for tab in configData["Tables"]:
     if tab["Type"] == "recipes":
         recipes_counter = int(tab["Number of rows"])
@@ -210,33 +213,6 @@ for tab in configData["Tables"]:
     )
     Tables.append(table)
 
-# for tab in Tables:
-#     if tab.type == "recipes":
-#         for col in tab.fields:
-#             for i in tab.rowsNumber:
-#                 if col.validation == "recipes":
-#                     col.data.append_data(recipes[i]["name"])
-#                 elif col.isPrimaryKey:
-#                     if col.type == "integer":
-#                         if len(col.date) == 0:
-#                             col.data.append_data(0)
-#                         else:
-#                             col.data.append_data(col.data[i-1]+1)
-#                     elif col.type == "string":
-#     for col in tab.fields:
-#         if col.validation == "recipes":
-#             for recipe in col["Number of rows"]:
-#                 col.data.append_data(recipes[recipe]["name"])
-#         elif col.validation == "ingredients":
-#             for ingredient in col["Number of rows"]:
-#                 col.data.append_data(ingredients_data[ingredient]["Name"])
-#         elif col.validation == "steps":
-#             for recipe in range(recipes_counter):
-#                 for step in recipes[recipe]["steps"]:
-#                     col.data.append_data(step)
-#         else:
-#             col.data.append_data("a")
-
 for recipe in range(recipes_counter):
     for tab in Tables:
         if tab.type == "recipes":
@@ -255,6 +231,14 @@ for recipe in range(recipes_counter):
                                 col.append_data("")#uzupełnić
                         else:
                             print("Error")
+                    elif col.autoIncrement:
+                        #-------------------------------------------------------------------------------------------------uzupełnić incrementBy
+                        if col.type == "integer":
+                            if len(col.date) == 0:
+                                col.append_data(0)
+                            else:
+                                col.append_data(col.data[recipe-1]+1)
+                        #--------------------------------------------------------------------------------------------------
                     else:
                         if col.type == "integer":
                             val = random.randint(0, 1000)
@@ -326,18 +310,295 @@ for recipe in range(recipes_counter):
                         col.append_data(uuid.uuid4())
                     elif col.type == "varchar":
                         col.append_data(uuid.uuid4())#do poprawki
-                    else:
-                        col.append_data("NULL")
         elif tab.type == "steps":
-            print("Error")
+            for step in recipes[recipe]["steps"]:
+                for col in tab.columns:
+                    if col.isUnique:
+                        if col.isPrimaryKey:
+                            if col.type == "integer":
+                                if len(col.date) == 0:
+                                    col.append_data(0)
+                                else:
+                                    col.append_data(col.data[recipe - 1] + 1)
+                            elif col.type == "string":
+                                if len(col.date) == 0:
+                                    col.append_data("")  # uzupełnić
+                                else:
+                                    col.append_data("")  # uzupełnić
+                            else:
+                                print("Error")
+                        elif col.autoIncrement:
+                            # ----------------------------------------------------------------------------------------------uzupełnić incrementBy
+                            if col.type == "integer":
+                                if len(col.date) == 0:
+                                    col.append_data(0)
+                                else:
+                                    col.append_data(col.data[recipe - 1] + 1)
+                            # --------------------------------------------------------------------------------------------
+                        else:
+                            if col.type == "integer":
+                                val = random.randint(0, 1000)
+                                while col.index(val) != -1:
+                                    val = random.randint(0, 1000)
+                                col.append_data(val)
+                            elif col.type == "string":
+                                val = str(uuid.uuid4())
+                                while col.index(val) != -1:
+                                    val = str(uuid.uuid4())
+                                col.append_data(val)
+                            elif col.type == "date":
+                                val = str("01-01-0001")
+                                while col.index(val) != -1:
+                                    val = str("01-01-0001")
+                                col.append_data(val)
+                            elif col.type == "time":
+                                val = str("00-00-00")
+                                while col.index(val) != -1:
+                                    val = str("00-00-00")
+                                col.append_data(val)
+                            elif col.type == "float":
+                                val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                                while col.index(val) != -1:
+                                    val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                                col.append_data(val)
+                            elif col.type == "decimal":
+                                val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                                while col.index(val) != -1:
+                                    val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                                col.append_data(val)
+                            elif col.type == "char":
+                                val = uuid.uuid4()
+                                while col.index(val) != -1:
+                                    val = uuid.uuid4()
+                                col.append_data(val)
+                            elif col.type == "varchar":
+                                val = uuid.uuid4()
+                                while col.index(val) != -1:
+                                    val = uuid.uuid4()
+                                col.append_data(val)  # do poprawki
+                    # elif col.default != "null":
+                    #     # (zabezpiczyć przed błędami)
+                    #     col.append_data(col.default)
+                    elif col.validation == "steps":
+                        # (zabezpiczyć przed błędami)
+                        col.append_data(step)
+                    # elif col.validation == "image":
+                    #     # (zabezpiczyć przed błędami)
+                    #     col.append_data("/---/")
+                    else:
+                        # if col.nullable:
+                        #     col.append_data("null")
+                        if col.type == "integer":
+                            col.append_data(random.randint(0, 1000))
+                        elif col.type == "string":
+                            col.append_data(str(uuid.uuid4()))
+                        elif col.type == "boolean":
+                            col.append_data(random.randint(0, 1))
+                        elif col.type == "date":
+                            col.append_data("01-01-0001")
+                        elif col.type == "time":
+                            col.append_data("00-00-00")
+                        elif col.type == "float":
+                            col.append_data(float(random.randint(0, 1000)) / float(random.randint(1, 1000)))
+                        elif col.type == "decimal":
+                            col.append_data(Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3)))
+                        elif col.type == "char":
+                            col.append_data(uuid.uuid4())
+                        elif col.type == "varchar":
+                            col.append_data(uuid.uuid4())  # do poprawki
         elif tab.type == "ingredients":
-            print("Error")
-        else:
-            print("Error")
+            for ingredient in recipes[recipe]["ingredients"]:
+                for col in tab.columns:
+                    if col.isUnique:
+                        if col.isPrimaryKey:
+                            if col.type == "integer":
+                                if len(col.date) == 0:
+                                    col.append_data(0)
+                                else:
+                                    col.append_data(col.data[recipe - 1] + 1)
+                            elif col.type == "string":
+                                if len(col.date) == 0:
+                                    col.append_data("")  # uzupełnić
+                                else:
+                                    col.append_data("")  # uzupełnić
+                            else:
+                                print("Error")
+                        elif col.autoIncrement:
+                            # ----------------------------------------------------------------------------------------------uzupełnić incrementBy
+                            if col.type == "integer":
+                                if len(col.date) == 0:
+                                    col.append_data(0)
+                                else:
+                                    col.append_data(col.data[recipe - 1] + 1)
+                            # --------------------------------------------------------------------------------------------
+                        else:
+                            if col.type == "integer":
+                                val = random.randint(0, 1000)
+                                while col.index(val) != -1:
+                                    val = random.randint(0, 1000)
+                                col.append_data(val)
+                            elif col.type == "string":
+                                val = str(uuid.uuid4())
+                                while col.index(val) != -1:
+                                    val = str(uuid.uuid4())
+                                col.append_data(val)
+                            elif col.type == "date":
+                                val = str("01-01-0001")
+                                while col.index(val) != -1:
+                                    val = str("01-01-0001")
+                                col.append_data(val)
+                            elif col.type == "time":
+                                val = str("00-00-00")
+                                while col.index(val) != -1:
+                                    val = str("00-00-00")
+                                col.append_data(val)
+                            elif col.type == "float":
+                                val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                                while col.index(val) != -1:
+                                    val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                                col.append_data(val)
+                            elif col.type == "decimal":
+                                val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                                while col.index(val) != -1:
+                                    val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                                col.append_data(val)
+                            elif col.type == "char":
+                                val = uuid.uuid4()
+                                while col.index(val) != -1:
+                                    val = uuid.uuid4()
+                                col.append_data(val)
+                            elif col.type == "varchar":
+                                val = uuid.uuid4()
+                                while col.index(val) != -1:
+                                    val = uuid.uuid4()
+                                col.append_data(val)  # do poprawki
+                    # elif col.default != "null":
+                    #     # (zabezpiczyć przed błędami)
+                    #     col.append_data(col.default)
+                    elif col.validation == "ingredient":
+                        # (zabezpiczyć przed błędami)
+                        col.append_data(ingredient)
+                    # elif col.validation == "image":
+                    #     # (zabezpiczyć przed błędami)
+                    #     col.append_data("/---/")
+                    else:
+                        # if col.nullable:
+                        #     col.append_data("null")
+                        if col.type == "integer":
+                            col.append_data(random.randint(0, 1000))
+                        elif col.type == "string":
+                            col.append_data(str(uuid.uuid4()))
+                        elif col.type == "boolean":
+                            col.append_data(random.randint(0, 1))
+                        elif col.type == "date":
+                            col.append_data("01-01-0001")
+                        elif col.type == "time":
+                            col.append_data("00-00-00")
+                        elif col.type == "float":
+                            col.append_data(float(random.randint(0, 1000)) / float(random.randint(1, 1000)))
+                        elif col.type == "decimal":
+                            col.append_data(Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3)))
+                        elif col.type == "char":
+                            col.append_data(uuid.uuid4())
+                        elif col.type == "varchar":
+                            col.append_data(uuid.uuid4())  # do poprawki
 
-
-
-
+# form
+#             for x in int(configData["Tables"][]["Number of rows"]):
+#                 for col in tab.columns:
+#                     if col.isUnique:
+#                         if col.isPrimaryKey:
+#                             if col.type == "integer":
+#                                 if len(col.date) == 0:
+#                                     col.append_data(0)
+#                                 else:
+#                                     col.append_data(col.data[recipe - 1] + 1)
+#                             elif col.type == "string":
+#                                 if len(col.date) == 0:
+#                                     col.append_data("")  # uzupełnić
+#                                 else:
+#                                     col.append_data("")  # uzupełnić
+#                             else:
+#                                 print("Error")
+#                         elif col.autoIncrement:
+#                             # ----------------------------------------------------------------------------------------------uzupełnić incrementBy
+#                             if col.type == "integer":
+#                                 if len(col.date) == 0:
+#                                     col.append_data(0)
+#                                 else:
+#                                     col.append_data(col.data[recipe - 1] + 1)
+#                             # --------------------------------------------------------------------------------------------
+#                         else:
+#                             if col.type == "integer":
+#                                 val = random.randint(0, 1000)
+#                                 while col.index(val) != -1:
+#                                     val = random.randint(0, 1000)
+#                                 col.append_data(val)
+#                             elif col.type == "string":
+#                                 val = str(uuid.uuid4())
+#                                 while col.index(val) != -1:
+#                                     val = str(uuid.uuid4())
+#                                 col.append_data(val)
+#                             elif col.type == "date":
+#                                 val = str("01-01-0001")
+#                                 while col.index(val) != -1:
+#                                     val = str("01-01-0001")
+#                                 col.append_data(val)
+#                             elif col.type == "time":
+#                                 val = str("00-00-00")
+#                                 while col.index(val) != -1:
+#                                     val = str("00-00-00")
+#                                 col.append_data(val)
+#                             elif col.type == "float":
+#                                 val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+#                                 while col.index(val) != -1:
+#                                     val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+#                                 col.append_data(val)
+#                             elif col.type == "decimal":
+#                                 val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+#                                 while col.index(val) != -1:
+#                                     val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+#                                 col.append_data(val)
+#                             elif col.type == "char":
+#                                 val = uuid.uuid4()
+#                                 while col.index(val) != -1:
+#                                     val = uuid.uuid4()
+#                                 col.append_data(val)
+#                             elif col.type == "varchar":
+#                                 val = uuid.uuid4()
+#                                 while col.index(val) != -1:
+#                                     val = uuid.uuid4()
+#                                 col.append_data(val)  # do poprawki
+#                     # elif col.default != "null":
+#                     #     # (zabezpiczyć przed błędami)
+#                     #     col.append_data(col.default)
+#                     elif col.validation == "ingredient":
+#                         # (zabezpiczyć przed błędami)
+#                         col.append_data(ingredient)
+#                     # elif col.validation == "image":
+#                     #     # (zabezpiczyć przed błędami)
+#                     #     col.append_data("/---/")
+#                     else:
+#                         # if col.nullable:
+#                         #     col.append_data("null")
+#                         if col.type == "integer":
+#                             col.append_data(random.randint(0, 1000))
+#                         elif col.type == "string":
+#                             col.append_data(str(uuid.uuid4()))
+#                         elif col.type == "boolean":
+#                             col.append_data(random.randint(0, 1))
+#                         elif col.type == "date":
+#                             col.append_data("01-01-0001")
+#                         elif col.type == "time":
+#                             col.append_data("00-00-00")
+#                         elif col.type == "float":
+#                             col.append_data(float(random.randint(0, 1000)) / float(random.randint(1, 1000)))
+#                         elif col.type == "decimal":
+#                             col.append_data(Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3)))
+#                         elif col.type == "char":
+#                             col.append_data(uuid.uuid4())
+#                         elif col.type == "varchar":
+#                             col.append_data(uuid.uuid4())  # do poprawki
 
 
 for tab in Tables:
