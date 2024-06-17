@@ -119,145 +119,108 @@ source_sql.close()
 
 #AI gen
 
-# recipes_counter = range(recipes_counter)
-# ingredients_counter = range(ingredients_counter)
-# other_tables_counter = range(other_tables_counter)
-steps_counter = range(1)
-counter = range(1)
+recipes_counter = range(recipes_counter)
+ingredients_counter = range(ingredients_counter)
+other_tables_counter = range(other_tables_counter)
+steps_counter = range(10)
+# counter = range(1)
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-database = {
-    "Tables":
-        [
-            {
-                "Table name": tab["Table name"],
-                "Columns":
-                    [
-                        {
-                            "Column name": col["Field name"],
-                            "Data list":
-                                [
-                                    {
-                                        "List":
-                                        {
-                                            "List":
-                                            {
-                                                "Data": recipes[recipe]["name"],
-                                            } if (col["Field name"] == "Name") else
-                                            {
-                                                {
-                                                    {
-                                                        {
-                                                            "Data": 0,  #pierwsza wartość PK, dodać pozostałe warunki
-                                                        } if recipe - 1 == 0 else
-                                                        {
-                                                            "Data": database[tab["Table name"]][col["Field name"]][recipes[recipe]["name"]][recipe - 1] + 1,
-                                                            #inkrementacja, dodać pozostałe warunki
-                                                        }
-                                                    } if "integer" in col["Type"] else
-                                                    {
-                                                        {
-                                                            "Data": "a",  #pierwsza wartość PK, dodać pozostałe warunki
-                                                        } if recipe - 1 == 0 else
-                                                        {
-                                                            "Data": chr(ord(database[tab["Table name"]][col["Field name"]][recipes[recipe]["name"]][recipe - 1]) + 1),
-                                                            #inkrementacja, dodać pozostałe warunki
-                                                        }
-                                                    } if "char" in col["Type"][
-                                                        "Type"] else "" and print("Wrong PK datatype!") and quit()
-                                                }
-                                            } if (col["Unique"] == "true") else
-                                            {
-                                                "Data": "NULL",
-                                                #dorobić sprawdzanie i uzupełnianie (może w nowym loopie)!!!
-                                            } if (col["FK References"] != "null") else
-                                            {
-                                                {
-                                                    "Data": col["Default"],
-                                                } if (col["Default"] != "null") else
-                                                {
-                                                    "Data": "NULL",
-                                                } if (col["Nullable"] != "null") else
-                                                {
-                                                    {
-                                                        "Data": random.choice(string.ascii_letters)
-                                                    } if "char" in col["Type"] else
-                                                    {
-                                                        "Data": random.choice(string.ascii_letters)
-                                                    } if "varchar" in col["Type"] else
-                                                    {
-                                                        "Data": "00:00:00",
-                                                    } if "time" in col["Type"] else
-                                                    {
-                                                        "Data": random.randint(0, 1000),
-                                                    } if "integer" in col["Type"] else
-                                                    {
-                                                        "Data": random.uniform(0, 1000),
-                                                    } if "float" in col["Type"] else
-                                                    {
-                                                        "Data": random.uniform(0, 1000), #sprawdzić czy nie ma dla double?
-                                                    } if "double" in col["Type"] else
-                                                    {
-                                                        "Data": decimal.Decimal(random.randint(0, 1000)/pow(10, random.randint(0, 3))),
-                                                    } if "decimal" in col["Type"] else
-                                                    {
-                                                        "Data": "",
-                                                    }
-                                                }
-                                            }
-                                        } for recipe in range(recipes_counter)
-                                    } if (tab["Table name"] == "Recipes") else ""
-                                    # {
-                                    #     {
-                                    #         {
-                                    #             #----------
-                                    #         } if (col["Field name"] == "Name") else ""
-                                    #     } for recipe in ingredients_counter
-                                    # } if (tab["Table name"] == "Ingredients") else
-                                    # {
-                                    #     {
-                                    #         {
-                                    #             #----------
-                                    #         } if (col["Field name"] == "Name") else ""
-                                    #     } for recipe in steps_counter
-                                    # } if (tab["Table name"] == "Steps") else
-                                    # {
-                                    #     {
-                                    #         {
-                                    #             #----------
-                                    #         } if (col["Field name"] == "Name") else ""
-                                    #     } for recipe in recipes_counter
-                                    # } if (tab["Table name"] == "Ingredients_Steps") else
-                                    # {
-                                    #     {
-                                    #         {
-                                    #             {
-                                    #                 "Data": col["Default"],
-                                    #             } if (col["Default"] != "null") else
-                                    #             {
-                                    #                 "Data": "NULL",
-                                    #             } if (col["Nullable"] != "null") else
-                                    #             {
-                                    #                 #----------
-                                    #             }
-                                    #         } if (col["Field name"] == "Name") else ""
-                                    #     } for recipe in counter
-                                    # }
-                                ]
-                        } for col in tab["Fields"]
-                    ]
-            } for tab in configData["Tables"]
-        ]
-}
+class Field:
+    def __init__(self, name, type, nullable, isUnique, default, autoIncrement, startWith, incrementBy, isPrimaryKey, FKReferences, validation, maxLength, minLength, excluded, mustHave):
+        self.name = name
+        self.type = type
+        self.nullable = nullable
+        self.isUnique = isUnique
+        self.default = default
+        self.isPrimaryKey = isPrimaryKey
+        self.FKReferences = FKReferences
+        self.startWith = startWith
+        self.incrementBy = incrementBy
+        self.autoIncrement = autoIncrement
+        self.validation = validation
+        self.maxLength = maxLength
+        self.minLength = minLength
+        self.excluded = excluded
+        self.mustHave = mustHave
+        self.data = []
 
-for tab in database["Tables"]:
-    for col in tab["Columns"]:
-        for data in col["Data list"]:
-            print(data_str["List"]["List"]["Data"])
+    def get_name(self):
+        return self.name
+
+    def set_type(self, type):
+        self.type = type
+    def set_nullable(self, nullable):
+        self.nullable = nullable
+    def set_unique(self, isUnique):
+        self.isUnique = isUnique
+    def set_primary(self, isPrimaryKey):
+        self.isPrimaryKey = isPrimaryKey
+    def set_FK(self, FKReferences):
+        self.FKReferences = FKReferences
+    def set_validation(self, validation):
+        self.validation = validation
+    def append_data(self, data):
+        self.data.append(data)
+    def pop_data(self, index):
+        self.data.pop(index)
+
+class Table:
+    def __init__(self, name, fields):
+        self.name = name
+        self.fields = fields
+
+Tables = []
+for tab in configData["Tables"]:
+    columns = []
+    for col in tab["Fields"]:
+        column = Field(
+            col["Field name"],
+            col["Type"],
+            col["Nullable"],
+            col["Unique"],
+            col["Default"],
+            col["Auto increment"],
+            col["Start with"],
+            col["Increment by"],
+            col["Is PK"],
+            col["FK References"],
+            col["Validation (regex/code)"],
+            col["Max length"],
+            col["Min length"],
+            col["Excluded"],
+            col["Must have"]
+        )
+        # column.append_data("smth")
+        columns.append(column)
+    table = Table(
+        tab["Table name"],
+        columns
+    )
+    Tables.append(table)
+
+for tab in Tables:
+    for col in tab.fields:
+        if col.validation == "recipes":
+            for recipe in recipes_counter:
+                col.data.append_data(recipes[recipe]["name"])
+        elif col.validation == "ingredients":
+            for ingredient in ingredients_counter:
+                col.data.append_data(ingredients_data[ingredient]["Name"])
+        elif col.validation == "steps":
+            for recipe in recipes_counter:
+                for step in recipes[recipe]["steps"]:
+                    col.data.append_data(step)
+        else:
+            col.data.append_data("")
+
+
+for tab in Tables:
+    for col in tab.fields:
+        for data in col.data:
             destination_sql.write(
-                "\nINSERT INTO " + tab["Table name"] + "(" + col["Column name"] + ") VALUES(" +
-                "data" + ");"
+                "\nINSERT INTO " + tab.name + "(" + col.name + ") VALUES(" + data + ");"
             )
 
 config.close()

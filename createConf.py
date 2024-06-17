@@ -240,7 +240,6 @@ dbconfig = {
                 "Fields":
                     [
                         {
-
                             "Field name": field.name,
                             "Type": field.type,
                             "Nullable": field.nullable,
