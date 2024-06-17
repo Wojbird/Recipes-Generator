@@ -1,5 +1,8 @@
 import random
 import json
+import uuid
+from decimal import Decimal
+
 # takie cos bo mi sie cos jebało i to pomogło
 # sys.path.insert(0, 'C:\\Users\\Wiktoria\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages')
 # sys.path.insert(0, 'C:\\Users\\wojma\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fatsecret')
@@ -30,9 +33,11 @@ headers = {
 config = open('dbconfig.json')
 configData = json.load(config)
 
-recipes_counter = int(configData["Recipes create number"])
-ingredients_counter = int(configData["Ingredients create number"])
-other_tables_counter = int(configData["Other tables create number"])
+for tab in configData["Tables"]:
+    if tab["Type"] == "recipes":
+        recipes_counter = int(tab["Number of rows"])
+    elif tab["Type"] == "ingredients":
+        ingredients_counter = int(tab["Number of rows"])
 
 #recipes_counter = configData["Recipes create number"]
 #ingredients_counter = configData["Ingredients create number"]
@@ -101,7 +106,7 @@ with open('ingredients_list.json', 'w', encoding='utf-8') as f:
     json.dump(ingredient_names, f, ensure_ascii=False, indent=4)
 
 #generator AI
-recipes = generatorAI.generate_recipes(ingredient_names, ingredients_counter, client, headers)
+recipes = generatorAI.generate_recipes(ingredient_names, recipes_counter, client, headers)
 generatorAI.display_recipes(recipes)
 #-----------------------------------------------
 
@@ -119,10 +124,10 @@ source_sql.close()
 
 #AI gen
 
-recipes_counter = range(recipes_counter)
-ingredients_counter = range(ingredients_counter)
-other_tables_counter = range(other_tables_counter)
-steps_counter = range(10)
+# recipes_counter = range(recipes_counter)
+# ingredients_counter = range(ingredients_counter)
+# other_tables_counter = range(other_tables_counter)
+# steps_counter = range(10)
 # counter = range(1)
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -165,11 +170,15 @@ class Field:
         self.data.append(data)
     def pop_data(self, index):
         self.data.pop(index)
+    def index_data(self, data):
+        self.data.index(data)
 
 class Table:
-    def __init__(self, name, fields):
+    def __init__(self, name, type, rowsNumber, columns):
         self.name = name
-        self.fields = fields
+        self.type = type
+        self.rowsNumber = rowsNumber
+        self.columns = columns
 
 Tables = []
 for tab in configData["Tables"]:
@@ -192,35 +201,150 @@ for tab in configData["Tables"]:
             col["Excluded"],
             col["Must have"]
         )
-        # column.append_data("smth")
         columns.append(column)
     table = Table(
         tab["Table name"],
+        tab["Type"],
+        int(tab["Number of rows"]),
         columns
     )
     Tables.append(table)
 
-for tab in Tables:
-    for col in tab.fields:
-        if col.validation == "recipes":
-            for recipe in recipes_counter:
-                col.data.append_data(recipes[recipe]["name"])
-        elif col.validation == "ingredients":
-            for ingredient in ingredients_counter:
-                col.data.append_data(ingredients_data[ingredient]["Name"])
-        elif col.validation == "steps":
-            for recipe in recipes_counter:
-                for step in recipes[recipe]["steps"]:
-                    col.data.append_data(step)
+# for tab in Tables:
+#     if tab.type == "recipes":
+#         for col in tab.fields:
+#             for i in tab.rowsNumber:
+#                 if col.validation == "recipes":
+#                     col.data.append_data(recipes[i]["name"])
+#                 elif col.isPrimaryKey:
+#                     if col.type == "integer":
+#                         if len(col.date) == 0:
+#                             col.data.append_data(0)
+#                         else:
+#                             col.data.append_data(col.data[i-1]+1)
+#                     elif col.type == "string":
+#     for col in tab.fields:
+#         if col.validation == "recipes":
+#             for recipe in col["Number of rows"]:
+#                 col.data.append_data(recipes[recipe]["name"])
+#         elif col.validation == "ingredients":
+#             for ingredient in col["Number of rows"]:
+#                 col.data.append_data(ingredients_data[ingredient]["Name"])
+#         elif col.validation == "steps":
+#             for recipe in range(recipes_counter):
+#                 for step in recipes[recipe]["steps"]:
+#                     col.data.append_data(step)
+#         else:
+#             col.data.append_data("a")
+
+for recipe in range(recipes_counter):
+    for tab in Tables:
+        if tab.type == "recipes":
+            for col in tab.columns:
+                if col.isUnique:
+                    if col.isPrimaryKey:
+                        if col.type == "integer":
+                            if len(col.date) == 0:
+                                col.append_data(0)
+                            else:
+                                col.append_data(col.data[recipe-1]+1)
+                        elif col.type == "string":
+                            if len(col.date) == 0:
+                                col.append_data("")#uzupełnić
+                            else:
+                                col.append_data("")#uzupełnić
+                        else:
+                            print("Error")
+                    else:
+                        if col.type == "integer":
+                            val = random.randint(0, 1000)
+                            while col.index(val) != -1:
+                                val = random.randint(0, 1000)
+                            col.append_data(val)
+                        elif col.type == "string":
+                            val = str(uuid.uuid4())
+                            while col.index(val) != -1:
+                                val = str(uuid.uuid4())
+                            col.append_data(val)
+                        elif col.type == "date":
+                            val = str("01-01-0001")
+                            while col.index(val) != -1:
+                                val = str("01-01-0001")
+                            col.append_data(val)
+                        elif col.type == "time":
+                            val = str("00-00-00")
+                            while col.index(val) != -1:
+                                val = str("00-00-00")
+                            col.append_data(val)
+                        elif col.type == "float":
+                            val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                            while col.index(val) != -1:
+                                val = float(random.randint(0, 1000)) / float(random.randint(1, 1000))
+                            col.append_data(val)
+                        elif col.type == "decimal":
+                            val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                            while col.index(val) != -1:
+                                val = Decimal(random.randint(0, 1000)) / pow(10, random.randint(0, 3))
+                            col.append_data(val)
+                        elif col.type == "char":
+                            val = uuid.uuid4()
+                            while col.index(val) != -1:
+                                val = uuid.uuid4()
+                            col.append_data(val)
+                        elif col.type == "varchar":
+                            val = uuid.uuid4()
+                            while col.index(val) != -1:
+                                val = uuid.uuid4()
+                            col.append_data(val)  # do poprawki
+                # elif col.default != "null":
+                #     # (zabezpiczyć przed błędami)
+                #     col.append_data(col.default)
+                elif col.validation == "recipes":
+                    # (zabezpiczyć przed błędami)
+                    col.append_data(recipes[recipe]["name"])
+                elif col.validation == "image":
+                    # (zabezpiczyć przed błędami)
+                    col.append_data("/---/")
+                else:
+                    # if col.nullable:
+                    #     col.append_data("null")
+                    if col.type == "integer":
+                        col.append_data(random.randint(0, 1000))
+                    elif col.type == "string":
+                        col.append_data(str(uuid.uuid4()))
+                    elif col.type == "boolean":
+                        col.append_data(random.randint(0, 1))
+                    elif col.type == "date":
+                        col.append_data("01-01-0001")
+                    elif col.type == "time":
+                        col.append_data("00-00-00")
+                    elif col.type == "float":
+                        col.append_data(float(random.randint(0, 1000))/float(random.randint(1, 1000)))
+                    elif col.type == "decimal":
+                        col.append_data(Decimal(random.randint(0, 1000))/pow(10, random.randint(0, 3)))
+                    elif col.type == "char":
+                        col.append_data(uuid.uuid4())
+                    elif col.type == "varchar":
+                        col.append_data(uuid.uuid4())#do poprawki
+                    else:
+                        col.append_data("NULL")
+        elif tab.type == "steps":
+            print("Error")
+        elif tab.type == "ingredients":
+            print("Error")
         else:
-            col.data.append_data("")
+            print("Error")
+
+
+
+
 
 
 for tab in Tables:
-    for col in tab.fields:
+    for col in tab.columns:
         for data in col.data:
             destination_sql.write(
-                "\nINSERT INTO " + tab.name + "(" + col.name + ") VALUES(" + data + ");"
+                "\nINSERT INTO " + tab.name + "(" + col.name + ") VALUES(" + str(data) + ");"
             )
 
 config.close()

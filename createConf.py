@@ -230,13 +230,15 @@ for line in lines:
 
 
 dbconfig = {
-    "Recipes create number": 2,
-    "Ingredients create number": 15,
-    "Other tables create number": 10,
+    # "Recipes create number": 2,
+    # "Ingredients create number": 15,
+    # "Other tables create number": 10,
     "Tables":
         [
             {
                 "Table name": table.name,
+                "Type": "None",
+                "Number of rows": 0,
                 "Fields":
                     [
                         {
